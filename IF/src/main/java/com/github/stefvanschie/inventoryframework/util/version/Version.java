@@ -17,34 +17,6 @@ import java.util.EnumSet;
 public enum Version {
 
     /**
-     * Version 1.14
-     *
-     * @since 0.10.0
-     */
-    V1_14,
-
-    /**
-     * Version 1.15
-     *
-     * @since 0.10.0
-     */
-    V1_15,
-
-    /**
-     * Version 1.16.1
-     *
-     * @since 0.10.0
-     */
-    V1_16_1,
-
-    /**
-     * Version 1.16.2 - 1.16.3
-     *
-     * @since 0.10.0
-     */
-    V1_16_2_3,
-
-    /**
      * Version 1.16.4 - 1.16.5
      *
      * @since 0.10.0
@@ -182,36 +154,21 @@ public enum Version {
      *
      * @since 0.10.18
      */
-    V1_21_2_3;
+    V1_21_2_3,
 
     /**
-     * A collection of versions on which modern smithing tables are available.
+     * Version above 1.21.3
+     *
+     * @since 0.10.18
      */
-    private static final Collection<Version> MODERN_SMITHING_TABLE_VERSIONS = EnumSet.of(
-            V1_19_4,
-            V1_20_0, V1_20_1, V1_20_2, V1_20_3_4, V1_20_5, V1_20_6,
-            V1_21_0, V1_21_1, V1_21_2_3
-    );
-
-    /**
-     * A collection of versions on which legacy smithing tables ae available.
-     */
-    @NotNull
-    private static final Collection<@NotNull Version> LEGACY_SMITHING_TABLE_VERSIONS = EnumSet.of(
-            V1_14,
-            V1_15,
-            V1_16_1, V1_16_2_3, V1_16_4_5,
-            V1_17_0, V1_17_1,
-            V1_18_0, V1_18_1, V1_18_2,
-            V1_19_0, V1_19_1, V1_19_2, V1_19_3, V1_19_4
-    );
+    V_above_1_21_2_3;
 
     /**
      * A collection of versions on which {@link InventoryView} is an interface.
      */
     @NotNull
     private static final Collection<@NotNull Version> INTERFACE_INVENTORY_VIEW = EnumSet.of(
-            V1_21_0, V1_21_1, V1_21_2_3
+            V1_21_0, V1_21_1, V1_21_2_3, V_above_1_21_2_3
     );
 
     /**
@@ -223,27 +180,6 @@ public enum Version {
     @Contract(pure = true)
     public boolean isInventoryViewInterface() {
         return INTERFACE_INVENTORY_VIEW.contains(this);
-    }
-
-    /**
-     * Checks whether modern smithing tables exist on this version. Returns true if they do, otherwise false.
-     *
-     * @return true if modern smithing tables are available
-     * @since 0.10.10
-     */
-    boolean existsModernSmithingTable() {
-        return MODERN_SMITHING_TABLE_VERSIONS.contains(this);
-    }
-
-    /**
-     * Checks whether legacy smithing tables exist on this version. Returns true if they do, otherwise false.
-     *
-     * @return true if legacy smithing tables are available
-     * @since 0.10.10
-     */
-    @Contract(pure = true)
-    boolean existsLegacySmithingTable() {
-        return LEGACY_SMITHING_TABLE_VERSIONS.contains(this);
     }
 
     /**
@@ -259,21 +195,6 @@ public enum Version {
         String version = Bukkit.getBukkitVersion().split("-")[0];
 
         switch (version) {
-            case "1.14":
-            case "1.14.1":
-            case "1.14.2":
-            case "1.14.3":
-            case "1.14.4":
-                return V1_14;
-            case "1.15":
-            case "1.15.1":
-            case "1.15.2":
-                return V1_15;
-            case "1.16.1":
-                return V1_16_1;
-            case "1.16.2":
-            case "1.16.3":
-                return V1_16_2_3;
             case "1.16.4":
             case "1.16.5":
                 return V1_16_4_5;
@@ -318,7 +239,7 @@ public enum Version {
             case "1.21.3":
                 return V1_21_2_3;
             default:
-                throw new UnsupportedVersionException("The server version provided is not supported");
+                return V_above_1_21_2_3;
         }
     }
 }

@@ -760,19 +760,13 @@ public abstract class Gui {
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Pane>) Slider::load);
         registerPane("togglebutton",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Pane>) ToggleButton::load);
-
-        registerGui("anvil",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) AnvilGui::load);
+;
         registerGui("barrel",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) BarrelGui::load);
-        registerGui("beacon",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) BeaconGui::load);
         registerGui("blast-furnace",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) BlastFurnaceGui::load);
         registerGui("brewing-stand",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) BrewingStandGui::load);
-        registerGui("cartography-table",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) CartographyTableGui::load);
         registerGui("chest",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) ChestGui::load);
         registerGui("crafting-table",
@@ -781,25 +775,15 @@ public abstract class Gui {
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) DispenserGui::load);
         registerGui("dropper",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) DropperGui::load);
-        registerGui("enchanting-table",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) EnchantingTableGui::load);
         registerGui("ender-chest",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) EnderChestGui::load);
         registerGui("furnace",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) FurnaceGui::load);
-        registerGui("grindstone",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) GrindstoneGui::load);
         registerGui("hopper",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) HopperGui::load);
-        registerGui("merchant",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) MerchantGui::load);
         registerGui("shulker-box",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) ShulkerBoxGui::load);
-        registerGui("smithing-table",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) SmithingTableGui::load);
         registerGui("smoker",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) SmokerGui::load);
-        registerGui("stonecutter",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) StonecutterGui::load);
     }
 }
