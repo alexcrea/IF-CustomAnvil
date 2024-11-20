@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>IF-parent</artifactId>
-        <groupId>com.github.stefvanschie.inventoryframework</groupId>
+        <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
         <version>0.10.18</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>IF</artifactId>
+    <artifactId>IF-CustomAnvil</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -36,19 +36,19 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.stefvanschie.inventoryframework</groupId>
+            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
             <artifactId>iv-abstraction</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.stefvanschie.inventoryframework</groupId>
+            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
             <artifactId>iv-abstract-class</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.stefvanschie.inventoryframework</groupId>
+            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
             <artifactId>iv-interface</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
@@ -86,7 +86,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.stefvanschie.inventoryframework</groupId>
+            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
             <artifactId>adventure-support</artifactId>
             <version>0.10.18</version>
             <scope>compile</scope>

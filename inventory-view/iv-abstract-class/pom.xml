@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.github.stefvanschie.inventoryframework</groupId>
+        <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
         <artifactId>IF-parent</artifactId>
         <version>0.10.18</version>
         <relativePath>../../pom.xml</relativePath>
@@ -25,7 +25,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.stefvanschie.inventoryframework</groupId>
+            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
             <artifactId>iv-abstraction</artifactId>
             <version>${project.version}</version>
         </dependency>

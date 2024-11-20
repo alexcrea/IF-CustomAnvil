@@ -20,14 +20,14 @@
         <adventure.version>4.17.0</adventure.version>
     </properties>
 
-    <groupId>com.github.stefvanschie.inventoryframework</groupId>
+    <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
     <artifactId>IF-parent</artifactId>
     <version>0.10.18</version>
     <packaging>pom</packaging>
 
-    <name>IF</name>
-    <description>An inventory framework for managing GUIs</description>
-    <url>https://github.com/stefvanschie/IF</url>
+    <name>IF-CustomAnvil</name>
+    <description>Custom version of IF (https://github.com/stefvanschie/IF) made for CustomAnvil.</description>
+    <url>https://github.com/alexcrea/IF-CustomAnvil</url>
 
     <licenses>
         <license>
@@ -38,7 +38,7 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/stefvanschie/IF.git</url>
+        <url>https://github.com/alexcrea/IF-CustomAnvil.git</url>
     </scm>
 
     <developers>
