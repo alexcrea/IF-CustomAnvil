@@ -22,7 +22,7 @@
 
     <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
     <artifactId>IF-parent</artifactId>
-    <version>0.10.18</version>
+    <version>0.10.18.2</version>
     <packaging>pom</packaging>
 
     <name>IF-CustomAnvil</name>

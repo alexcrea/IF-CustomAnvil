@@ -1,5 +1,6 @@
 package com.github.stefvanschie.inventoryframework.inventoryview.abstraction;
 
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -84,4 +85,16 @@ public interface AbstractInventoryViewUtil {
      */
     @NotNull
     Inventory getTopInventory(@NotNull InventoryView view);
+
+    /**
+     * Behaves according to {@link InventoryView#getPlayer()}.
+     *
+     * @param view the {@link InventoryView} to invoke {@link InventoryView#getPlayer()} ()} on
+     * @return the inventory type
+     * @since 0.10.16.2
+     */
+
+    @NotNull
+    HumanEntity getPlayer(@NotNull InventoryView view);
+
 }

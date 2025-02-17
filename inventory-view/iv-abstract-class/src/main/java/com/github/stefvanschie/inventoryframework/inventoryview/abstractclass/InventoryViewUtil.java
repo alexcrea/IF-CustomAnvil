@@ -1,6 +1,8 @@
 package com.github.stefvanschie.inventoryframework.inventoryview.abstractclass;
 
 import com.github.stefvanschie.inventoryframework.inventoryview.abstraction.AbstractInventoryViewUtil;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -61,6 +63,12 @@ public class InventoryViewUtil implements AbstractInventoryViewUtil {
     @Override
     public Inventory getTopInventory(@NotNull InventoryView view) {
         return view.getTopInventory();
+    }
+
+    @NotNull
+    @Override
+    public HumanEntity getPlayer(@NotNull InventoryView view) {
+        return view.getPlayer();
     }
 
     /**
