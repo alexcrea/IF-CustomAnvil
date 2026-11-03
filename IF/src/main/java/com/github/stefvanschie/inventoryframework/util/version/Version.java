@@ -38,53 +38,11 @@ public enum Version {
     V1_17_1,
 
     /**
-     * Version 1.18.0
-     *
-     * @since 0.10.4
-     */
-    V1_18_0,
-
-    /**
-     * Version 1.18.1
-     *
-     * @since 0.10.4
-     */
-    V1_18_1,
-
-    /**
      * Version 1.18.2
      *
      * @since 0.10.5
      */
     V1_18_2,
-
-    /**
-     * Version 1.19.0
-     *
-     * @since 0.10.6
-     */
-    V1_19_0,
-
-    /**
-     * Version 1.19.1
-     *
-     * @since 0.10.7
-     */
-    V1_19_1,
-
-    /**
-     * Version 1.19.2
-     *
-     * @since 0.10.7
-     */
-    V1_19_2,
-
-    /**
-     * Version 1.19.3
-     *
-     * @since 0.10.8
-     */
-    V1_19_3,
 
     /**
      * Version 1.19.4
@@ -194,28 +152,18 @@ public enum Version {
     public static Version getVersion() {
         String version = Bukkit.getBukkitVersion().split("-")[0];
 
+        if (version.indexOf('.') == 2) {
+            return V26_1; //this is a 26.1+ release, so it's V26.1
+        }
+
         switch (version) {
             case "1.16.4":
             case "1.16.5":
-                return V1_16_4_5;
-            case "1.17":
-                return V1_17_0;
+                return V1_16_5;
             case "1.17.1":
                 return V1_17_1;
-            case "1.18":
-                return V1_18_0;
-            case "1.18.1":
-                return V1_18_1;
             case "1.18.2":
                 return V1_18_2;
-            case "1.19":
-                return V1_19_0;
-            case "1.19.1":
-                return V1_19_1;
-            case "1.19.2":
-                return V1_19_2;
-            case "1.19.3":
-                return V1_19_3;
             case "1.19.4":
                 return V1_19_4;
             case "1.20":
@@ -238,6 +186,19 @@ public enum Version {
             case "1.21.2":
             case "1.21.3":
                 return V1_21_2_3;
+            case "1.21.4":
+                return V1_21_4;
+            case "1.21.5":
+                return V1_21_5;
+            case "1.21.6":
+            case "1.21.7":
+            case "1.21.8":
+                return V1_21_6_8;
+            case "1.21.9":
+            case "1.21.10":
+                return V1_21_9_10;
+            case "1.21.11":
+                return V1_21_11;
             default:
                 return V_above_1_21_2_3;
         }

@@ -10,6 +10,7 @@
         <module>inventory-view/iv-abstract-class</module>
         <module>inventory-view/iv-abstraction</module>
         <module>inventory-view/iv-interface</module>
+        <module>nms/26_1</module>
     </modules>
 
     <properties>
@@ -17,12 +18,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.deploy.skip>true</maven.deploy.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <adventure.version>4.17.0</adventure.version>
+        <adventure.version>5.2.0</adventure.version>
     </properties>
 
     <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
     <artifactId>IF-parent</artifactId>
-    <version>0.10.18.2</version>
+    <version>0.12.2</version>
     <packaging>pom</packaging>
 
     <name>IF-CustomAnvil</name>
@@ -56,7 +57,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.1.0</version>
+            <version>26.1.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -68,7 +69,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.5</version>
+                        <version>3.2.8</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -89,24 +90,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.6.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
                         <artifactId>surefire-junit-platform </artifactId>
-                        <version>3.5.2</version>
+                        <version>3.6.0</version>
                     </dependency>
                     <dependency>
                         <groupId>org.junit.jupiter</groupId>
                         <artifactId>junit-jupiter-engine</artifactId>
-                        <version>5.11.0</version>
+                        <version>6.1.3</version>
                     </dependency>
                 </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -119,7 +120,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.10.0</version>
+                <version>3.12.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -131,7 +132,7 @@
                 <configuration>
                     <links>
                         <link>https://hub.spigotmc.org/javadocs/bukkit/</link>
-                        <link>https://jd.adventure.kyori.net/api/4.10.0/</link>
+                        <link>https://jd.papermc.io/adventure/${adventure.version}/</link>
                     </links>
                 </configuration>
             </plugin>

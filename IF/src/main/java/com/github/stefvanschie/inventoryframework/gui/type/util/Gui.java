@@ -1,22 +1,32 @@
 package com.github.stefvanschie.inventoryframework.gui.type.util;
 
 import com.github.stefvanschie.inventoryframework.HumanEntityCache;
+import com.github.stefvanschie.inventoryframework.annotation.exception.InvalidParametersException;
+import com.github.stefvanschie.inventoryframework.annotation.exception.MultipleAnnotationsException;
+import com.github.stefvanschie.inventoryframework.annotation.CloseHandler;
+import com.github.stefvanschie.inventoryframework.annotation.click.BottomClickHandler;
+import com.github.stefvanschie.inventoryframework.annotation.click.GlobalClickHandler;
+import com.github.stefvanschie.inventoryframework.annotation.click.OutsideClickHandler;
+import com.github.stefvanschie.inventoryframework.annotation.click.TopClickHandler;
+import com.github.stefvanschie.inventoryframework.annotation.drag.BottomDragHandler;
+import com.github.stefvanschie.inventoryframework.annotation.drag.GlobalDragHandler;
+import com.github.stefvanschie.inventoryframework.annotation.drag.TopDragHandler;
 import com.github.stefvanschie.inventoryframework.exception.XMLLoadException;
+import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.GuiListener;
 import com.github.stefvanschie.inventoryframework.gui.type.*;
 import com.github.stefvanschie.inventoryframework.pane.*;
 import com.github.stefvanschie.inventoryframework.pane.component.*;
 import com.github.stefvanschie.inventoryframework.util.TriFunction;
 import com.github.stefvanschie.inventoryframework.util.XMLUtil;
+import com.github.stefvanschie.inventoryframework.util.version.Version;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
@@ -31,7 +41,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -63,55 +78,60 @@ public abstract class Gui {
      * The consumer that will be called once a players clicks in the top-half of the gui
      */
     @Nullable
-    protected Consumer<InventoryClickEvent> onTopClick;
+    protected Consumer<? super InventoryClickEvent> onTopClick;
 
     /**
      * The consumer that will be called once a players clicks in the bottom-half of the gui
      */
     @Nullable
-    protected Consumer<InventoryClickEvent> onBottomClick;
+    protected Consumer<? super InventoryClickEvent> onBottomClick;
 
     /**
      * The consumer that will be called once a players clicks in the gui or in their inventory
      */
     @Nullable
-    protected Consumer<InventoryClickEvent> onGlobalClick;
+    protected Consumer<? super InventoryClickEvent> onGlobalClick;
 
     /**
      * The consumer that will be called once a player clicks outside of the gui screen
      */
     @Nullable
-    protected Consumer<InventoryClickEvent> onOutsideClick;
+    protected Consumer<? super InventoryClickEvent> onOutsideClick;
 
     /**
      * The consumer that will be called once a player drags in the top-half of the gui
      */
     @Nullable
-    protected Consumer<InventoryDragEvent> onTopDrag;
+    protected Consumer<? super InventoryDragEvent> onTopDrag;
 
     /**
      * The consumer that will be called once a player drags in the bottom-half of the gui
      */
     @Nullable
-    protected Consumer<InventoryDragEvent> onBottomDrag;
+    protected Consumer<? super InventoryDragEvent> onBottomDrag;
 
     /**
      * The consumer that will be called once a player drags in the gui or their inventory
      */
     @Nullable
-    protected Consumer<InventoryDragEvent> onGlobalDrag;
+    protected Consumer<? super InventoryDragEvent> onGlobalDrag;
 
     /**
      * The consumer that will be called once a player closes the gui
      */
     @Nullable
-    protected Consumer<InventoryCloseEvent> onClose;
+    protected Consumer<? super InventoryCloseEvent> onClose;
 
     /**
      * Whether this gui is updating (as invoked by {@link #update()}), true if this is the case, false otherwise. This
      * is used to indicate that inventory close events due to updating should be ignored.
      */
-    boolean updating = false;
+    protected boolean updating = false;
+
+    /**
+     * Whether the gui is dirty i.e., has changed. Dirty by default since it won't have been updated after its creation.
+     */
+    protected boolean dirty = true;
 
     /**
      * The parent gui. This gui will be navigated to once a player closes this gui. If this is null, the player will not
@@ -135,12 +155,33 @@ public abstract class Gui {
         GUI_MAPPINGS = new HashMap<>();
 
     /**
+     * A map containing all the annotations and their associated actions for click handlers.
+     */
+    @NotNull
+    private static final Map<Class<? extends Annotation>,
+            BiConsumer<? super Gui, Consumer<? super InventoryClickEvent>>> CLICK_ANNOTATIONS = new HashMap<>();
+
+    /**
+     * A map containing all the annotations and their associated actions for drag handlers.
+     */
+    @NotNull
+    private static final Map<Class<? extends Annotation>,
+            BiConsumer<? super Gui, Consumer<? super InventoryDragEvent>>> DRAG_ANNOTATIONS = new HashMap<>();
+
+    /**
+     * A map containing all the annotations and their associated actions for close handlers.
+     */
+    @NotNull
+    private static final Map<Class<? extends Annotation>,
+            BiConsumer<? super Gui, Consumer<? super InventoryCloseEvent>>> CLOSE_ANNOTATIONS = new HashMap<>();
+
+    /**
      * A map containing the relations between inventories and their respective gui. This is needed because Bukkit and
      * Spigot ignore inventory holders for beacons, brewing stands, dispensers, droppers, furnaces and hoppers. The
      * inventory holder for beacons is already being set properly via NMS, but this contains the other inventory types.
      */
     @NotNull
-    private static final Map<Inventory, Gui> GUI_INVENTORIES = new WeakHashMap<>();
+    private static final Map<Inventory, WeakReference<Gui>> GUI_INVENTORIES = new WeakHashMap<>();
 
     /**
      * Whether listeners have ben registered by some gui
@@ -157,10 +198,17 @@ public abstract class Gui {
         this.plugin = plugin;
 
         if (!hasRegisteredListeners) {
+            /*This throws an exception if the version is unsupported. We want this thrown if our version is unsupported,
+              to prevent people opening guis that do not behave correctly. */
+            //noinspection ResultOfMethodCallIgnored
+            Version.getVersion();
+
             Bukkit.getPluginManager().registerEvents(new GuiListener(plugin), plugin);
 
             hasRegisteredListeners = true;
         }
+
+        processAnnotations();
     }
 
     /**
@@ -226,23 +274,17 @@ public abstract class Gui {
     /**
      * Update the gui for everyone
      */
-    public void update() {
-        updating = true;
+    public abstract void update();
 
-        for (HumanEntity viewer : getViewers()) {
-            ItemStack cursor = viewer.getItemOnCursor();
-            viewer.setItemOnCursor(new ItemStack(Material.AIR));
-
-            show(viewer);
-
-            viewer.setItemOnCursor(cursor);
-        }
-
-        if (!updating)
-            throw new AssertionError("Gui#isUpdating became false before Gui#update finished");
-
-        updating = false;
-    }
+    /**
+     * Gets all the {@link GuiItem} instances in this gui.
+     *
+     * @return all gui items
+     * @since 0.12.0
+     */
+    @NotNull
+    @Contract(pure = true)
+    public abstract Iterable<? extends GuiItem> getItems();
 
     /**
      * Adds the specified inventory and gui, so we can properly intercept clicks.
@@ -252,7 +294,7 @@ public abstract class Gui {
      * @since 0.8.1
      */
     protected void addInventory(@NotNull Inventory inventory, @NotNull Gui gui) {
-        GUI_INVENTORIES.put(inventory, gui);
+        GUI_INVENTORIES.put(inventory, new WeakReference<>(gui));
     }
 
     /**
@@ -266,7 +308,19 @@ public abstract class Gui {
     @Nullable
     @Contract(pure = true)
     public static Gui getGui(@NotNull Inventory inventory) {
-        return GUI_INVENTORIES.get(inventory);
+        WeakReference<Gui> reference = GUI_INVENTORIES.get(inventory);
+
+        if (reference == null) {
+            return null;
+        }
+
+        Gui gui = reference.get();
+
+        if (gui == null) {
+            GUI_INVENTORIES.remove(inventory, reference);
+        }
+
+        return gui;
     }
 
     /**
@@ -395,7 +449,7 @@ public abstract class Gui {
      *
      * @param onTopClick the consumer that gets called
      */
-    public void setOnTopClick(@Nullable Consumer<InventoryClickEvent> onTopClick) {
+    public void setOnTopClick(@Nullable Consumer<? super InventoryClickEvent> onTopClick) {
         this.onTopClick = onTopClick;
     }
 
@@ -416,7 +470,7 @@ public abstract class Gui {
      *
      * @param onBottomClick the consumer that gets called
      */
-    public void setOnBottomClick(@Nullable Consumer<InventoryClickEvent> onBottomClick) {
+    public void setOnBottomClick(@Nullable Consumer<? super InventoryClickEvent> onBottomClick) {
         this.onBottomClick = onBottomClick;
     }
 
@@ -437,7 +491,7 @@ public abstract class Gui {
      *
      * @param onGlobalClick the consumer that gets called
      */
-    public void setOnGlobalClick(@Nullable Consumer<InventoryClickEvent> onGlobalClick) {
+    public void setOnGlobalClick(@Nullable Consumer<? super InventoryClickEvent> onGlobalClick) {
         this.onGlobalClick = onGlobalClick;
     }
 
@@ -459,7 +513,7 @@ public abstract class Gui {
      * @param onOutsideClick the consumer that gets called
      * @since 0.5.7
      */
-    public void setOnOutsideClick(@Nullable Consumer<InventoryClickEvent> onOutsideClick) {
+    public void setOnOutsideClick(@Nullable Consumer<? super InventoryClickEvent> onOutsideClick) {
         this.onOutsideClick = onOutsideClick;
     }
 
@@ -481,7 +535,7 @@ public abstract class Gui {
      * @param onTopDrag the consumer that gets called
      * @since 0.9.0
      */
-    public void setOnTopDrag(@Nullable Consumer<InventoryDragEvent> onTopDrag) {
+    public void setOnTopDrag(@Nullable Consumer<? super InventoryDragEvent> onTopDrag) {
         this.onTopDrag = onTopDrag;
     }
 
@@ -503,7 +557,7 @@ public abstract class Gui {
      * @param onBottomDrag the consumer that gets called
      * @since 0.9.0
      */
-    public void setOnBottomDrag(@Nullable Consumer<InventoryDragEvent> onBottomDrag) {
+    public void setOnBottomDrag(@Nullable Consumer<? super InventoryDragEvent> onBottomDrag) {
         this.onBottomDrag = onBottomDrag;
     }
 
@@ -525,7 +579,7 @@ public abstract class Gui {
      * @param onGlobalDrag the consumer that gets called
      * @since 0.9.0
      */
-    public void setOnGlobalDrag(@Nullable Consumer<InventoryDragEvent> onGlobalDrag) {
+    public void setOnGlobalDrag(@Nullable Consumer<? super InventoryDragEvent> onGlobalDrag) {
         this.onGlobalDrag = onGlobalDrag;
     }
 
@@ -546,7 +600,7 @@ public abstract class Gui {
      *
      * @param onClose the consumer that gets called
      */
-    public void setOnClose(@Nullable Consumer<InventoryCloseEvent> onClose) {
+    public void setOnClose(@Nullable Consumer<? super InventoryCloseEvent> onClose) {
         this.onClose = onClose;
     }
 
@@ -618,6 +672,27 @@ public abstract class Gui {
     }
 
     /**
+     * Marks that the changes present here have been accepted. This sets dirty to false. If dirty was already false,
+     * this will do nothing.
+     *
+     * @since 0.12.1
+     */
+    public void markChanges() {
+        this.dirty = false;
+    }
+
+    /**
+     * Gets whether this title is dirty or not i.e. whether the title has changed.
+     *
+     * @return whether the title is dirty
+     * @since 0.12.1
+     */
+    @Contract(pure = true)
+    public boolean isDirty() {
+        return this.dirty;
+    }
+
+    /**
      * Gets whether this gui is being updated, as invoked by {@link #update()}. This returns true if this is the case
      * and false otherwise.
      *
@@ -638,8 +713,8 @@ public abstract class Gui {
      *                 into the correct object type.
      * @throws IllegalArgumentException when a property with this name is already registered.
      */
-    public static void registerProperty(@NotNull String attributeName, @NotNull Function<String, Object> function) {
-        Pane.registerProperty(attributeName, function);
+    public static void registerProperty(@NotNull String attributeName, @NotNull Function<? super String, ?> function) {
+        GuiItem.registerProperty(attributeName, function);
     }
 
     /**
@@ -667,7 +742,8 @@ public abstract class Gui {
      * @param biFunction how the pane loading should be processed
      * @throws IllegalArgumentException when a pane with this name is already registered
      */
-    public static void registerPane(@NotNull String name, @NotNull BiFunction<Object, Element, Pane> biFunction) {
+    public static void registerPane(@NotNull String name,
+                                    @NotNull BiFunction<? super Object, ? super Element, ? extends Pane> biFunction) {
         registerPane(name, (object, element, plugin) -> biFunction.apply(object, element));
     }
 
@@ -686,21 +762,6 @@ public abstract class Gui {
         }
 
         GUI_MAPPINGS.put(name, triFunction);
-    }
-
-    /**
-     * Registers a type that can be used inside an XML file to specify the gui type
-     *
-     * @param name the name of the type of gui to be used in an XML file
-     * @param biFunction how the gui creation should be processed
-     * @throws IllegalArgumentException when a gui type with this name is already registered
-     * @deprecated this method is no longer used internally and has been superseded by
-     *             {@link #registerPane(String, TriFunction)}
-     */
-    @Deprecated
-    public static void registerGui(@NotNull String name,
-                                   @NotNull BiFunction<? super Object, ? super Element, ? extends Gui> biFunction) {
-        registerGui(name, (object, element, plugin) -> biFunction.apply(object, element));
     }
 
     /**
@@ -735,6 +796,65 @@ public abstract class Gui {
     @NotNull
     public static Pane loadPane(@NotNull Object instance, @NotNull Node node) {
         return loadPane(instance, node, JavaPlugin.getProvidingPlugin(Gui.class));
+    }
+
+    /**
+     * Processes the annotations that appear on method bodies. The annotations that are specified and the action that
+     * corresponds to these annotations are specified in the map. The type parameter specifies which parameter type may
+     * appear in the method for these annotations.
+     *
+     * @param map the map of annotations and their associated action
+     * @param type the class of parameter that is accepted as a parameter
+     * @param <T> the type of parameter that is accepted as a parameter
+     * @since 0.12.1
+     */
+    private <T> void processMethodAnnotations(@NotNull Map<? extends Class<? extends Annotation>, BiConsumer<? super Gui, Consumer<? super T>>> map,
+                                              @NotNull Class<T> type) {
+        Set<Class<?>> processed = new HashSet<>();
+
+        for (Method method : getClass().getDeclaredMethods()) {
+            int parameterCount = method.getParameterCount();
+            Class<?> parameter = parameterCount != 0 ? method.getParameterTypes()[0] : null;
+
+            for (Map.Entry<? extends Class<? extends Annotation>, BiConsumer<? super Gui, Consumer<? super T>>> entry : map.entrySet()) {
+                Class<? extends Annotation> annotation = entry.getKey();
+
+                if (method.isAnnotationPresent(annotation)) {
+                    if (processed.contains(annotation)) {
+                        throw new MultipleAnnotationsException(annotation.getSimpleName() + " appears multiple times");
+                    }
+
+                    processed.add(annotation);
+
+                    if (parameterCount != 0 && (parameterCount != 1 || !parameter.isAssignableFrom(type))) {
+                        throw new InvalidParametersException("Invalid parameters for " + annotation.getSimpleName());
+                    }
+
+                    entry.getValue().accept(this, event -> {
+                        try {
+                            if (parameterCount == 0) {
+                                method.invoke(this);
+                            } else {
+                                method.invoke(this, event);
+                            }
+                        } catch (IllegalAccessException | InvocationTargetException exception) {
+                            throw new RuntimeException(exception);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    /**
+     * Processes all the annotations that might be present in a subclass of this class.
+     *
+     * @since 0.12.1
+     */
+    private void processAnnotations() {
+        processMethodAnnotations(CLICK_ANNOTATIONS, InventoryClickEvent.class);
+        processMethodAnnotations(DRAG_ANNOTATIONS, InventoryDragEvent.class);
+        processMethodAnnotations(CLOSE_ANNOTATIONS, InventoryCloseEvent.class);
     }
 
     static {
@@ -781,9 +901,22 @@ public abstract class Gui {
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) FurnaceGui::load);
         registerGui("hopper",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) HopperGui::load);
+        registerGui("loom",
+                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) LoomGui::load);
         registerGui("shulker-box",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) ShulkerBoxGui::load);
         registerGui("smoker",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) SmokerGui::load);
+
+        CLICK_ANNOTATIONS.put(BottomClickHandler.class, Gui::setOnBottomClick);
+        CLICK_ANNOTATIONS.put(GlobalClickHandler.class, Gui::setOnGlobalClick);
+        CLICK_ANNOTATIONS.put(OutsideClickHandler.class, Gui::setOnOutsideClick);
+        CLICK_ANNOTATIONS.put(TopClickHandler.class, Gui::setOnTopClick);
+
+        DRAG_ANNOTATIONS.put(BottomDragHandler.class, Gui::setOnBottomDrag);
+        DRAG_ANNOTATIONS.put(GlobalDragHandler.class, Gui::setOnGlobalDrag);
+        DRAG_ANNOTATIONS.put(TopDragHandler.class, Gui::setOnTopDrag);
+
+        CLOSE_ANNOTATIONS.put(CloseHandler.class, Gui::setOnClose);
     }
 }
