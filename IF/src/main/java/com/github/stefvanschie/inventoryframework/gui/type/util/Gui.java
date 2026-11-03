@@ -19,7 +19,6 @@ import com.github.stefvanschie.inventoryframework.pane.*;
 import com.github.stefvanschie.inventoryframework.pane.component.*;
 import com.github.stefvanschie.inventoryframework.util.TriFunction;
 import com.github.stefvanschie.inventoryframework.util.XMLUtil;
-import com.github.stefvanschie.inventoryframework.util.version.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -198,11 +197,6 @@ public abstract class Gui {
         this.plugin = plugin;
 
         if (!hasRegisteredListeners) {
-            /*This throws an exception if the version is unsupported. We want this thrown if our version is unsupported,
-              to prevent people opening guis that do not behave correctly. */
-            //noinspection ResultOfMethodCallIgnored
-            Version.getVersion();
-
             Bukkit.getPluginManager().registerEvents(new GuiListener(plugin), plugin);
 
             hasRegisteredListeners = true;
@@ -901,8 +895,6 @@ public abstract class Gui {
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) FurnaceGui::load);
         registerGui("hopper",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) HopperGui::load);
-        registerGui("loom",
-                (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) LoomGui::load);
         registerGui("shulker-box",
                 (TriFunction<? super Object, ? super Element, ? super Plugin, ? extends Gui>) ShulkerBoxGui::load);
         registerGui("smoker",

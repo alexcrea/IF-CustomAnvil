@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>IF-parent</artifactId>
-        <groupId>com.github.stefvanschie.inventoryframework</groupId>
-        <version>0.12.2</version>
+        <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
+        <version>0.12.2.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -48,24 +48,6 @@
             <artifactId>adventure-api</artifactId>
             <version>${adventure.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
-            <artifactId>iv-abstraction</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
-            <artifactId>iv-abstract-class</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
-            <artifactId>iv-interface</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>

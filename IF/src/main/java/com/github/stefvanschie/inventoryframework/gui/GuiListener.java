@@ -4,7 +4,6 @@ import com.github.stefvanschie.inventoryframework.HumanEntityCache;
 import com.github.stefvanschie.inventoryframework.gui.type.*;
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.gui.type.util.NamedGui;
-import com.github.stefvanschie.inventoryframework.util.InventoryViewUtil;
 import com.github.stefvanschie.inventoryframework.util.UUIDTagType;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -73,7 +72,7 @@ public class GuiListener implements Listener {
         }
 
         InventoryView view = event.getView();
-        Inventory inventory = InventoryViewUtil.getInstance().getInventory(view, event.getRawSlot());
+        Inventory inventory = view.getInventory(event.getRawSlot());
 
         if (inventory == null) {
             gui.callOnOutsideClick(event);
@@ -81,7 +80,7 @@ public class GuiListener implements Listener {
         }
 
         gui.callOnGlobalClick(event);
-        if (inventory.equals(InventoryViewUtil.getInstance().getTopInventory(view))) {
+        if (inventory.equals(view.getTopInventory())) {
             gui.callOnTopClick(event);
         } else {
             gui.callOnBottomClick(event);
@@ -114,7 +113,7 @@ public class GuiListener implements Listener {
             return;
         }
 
-        Gui gui = getGui(InventoryViewUtil.getInstance().getTopInventory(((HumanEntity) entity).getOpenInventory()));
+        Gui gui = getGui(((HumanEntity) entity).getOpenInventory().getTopInventory());
 
         if (gui == null || !gui.isPlayerInventoryUsed()) {
             return;
@@ -156,11 +155,11 @@ public class GuiListener implements Listener {
             boolean top = false, bottom = false;
 
             for (int inventorySlot : inventorySlots) {
-                Inventory inventory = InventoryViewUtil.getInstance().getInventory(view, inventorySlot);
+                Inventory inventory = view.getInventory(inventorySlot);
 
-                if (InventoryViewUtil.getInstance().getTopInventory(view).equals(inventory)) {
+                if (view.getTopInventory().equals(inventory)) {
                     top = true;
-                } else if (InventoryViewUtil.getInstance().getBottomInventory(view).equals(inventory)) {
+                } else if (view.getBottomInventory().equals(inventory)) {
                     bottom = true;
                 }
 
@@ -180,24 +179,24 @@ public class GuiListener implements Listener {
             }
         } else {
             int index = inventorySlots.toArray(new Integer[0])[0];
-            InventoryType.SlotType slotType = InventoryViewUtil.getInstance().getSlotType(view, index);
+            InventoryType.SlotType slotType = view.getSlotType(index);
 
             boolean even = event.getType() == DragType.EVEN;
 
             ClickType clickType = even ? ClickType.LEFT : ClickType.RIGHT;
             InventoryAction inventoryAction = even ? InventoryAction.PLACE_SOME : InventoryAction.PLACE_ONE;
 
-            ItemStack previousViewCursor = InventoryViewUtil.getInstance().getCursor(view);
+            ItemStack previousViewCursor = view.getCursor();
             // Overwrite getCursor in inventory click event to mimic real event fired by Bukkit.
-            InventoryViewUtil.getInstance().setCursor(view, event.getOldCursor());
+            view.setCursor(event.getOldCursor());
             //this is a fake click event, firing this may cause other plugins to function incorrectly, so keep it local
             InventoryClickEvent inventoryClickEvent = new InventoryClickEvent(view, slotType, index, clickType,
                 inventoryAction);
 
             onInventoryClick(inventoryClickEvent);
             // Restore previous cursor only if someone has not changed it manually in onInventoryClick.
-            if (Objects.equals(InventoryViewUtil.getInstance().getCursor(view), event.getOldCursor())) {
-                InventoryViewUtil.getInstance().setCursor(view, previousViewCursor);
+            if (Objects.equals(view.getCursor(), event.getOldCursor())) {
+                view.setCursor(previousViewCursor);
             }
 
             event.setCancelled(inventoryClickEvent.isCancelled());
@@ -270,7 +269,7 @@ public class GuiListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerDropItem(@NotNull PlayerDropItemEvent event) {
-        Gui gui = getGui(InventoryViewUtil.getInstance().getTopInventory(event.getPlayer().getOpenInventory()));
+        Gui gui = getGui(event.getPlayer().getOpenInventory().getTopInventory());
 
         if (gui == null) {
             return;

@@ -7,15 +7,10 @@
     <modules>
         <module>IF</module>
         <module>adventure-support</module>
-        <module>inventory-view/iv-abstract-class</module>
-        <module>inventory-view/iv-abstraction</module>
-        <module>inventory-view/iv-interface</module>
-        <module>nms/26_1</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <maven.deploy.skip>true</maven.deploy.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <adventure.version>5.2.0</adventure.version>
@@ -23,7 +18,7 @@
 
     <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
     <artifactId>IF-parent</artifactId>
-    <version>0.12.2</version>
+    <version>0.12.2.2</version>
     <packaging>pom</packaging>
 
     <name>IF-CustomAnvil</name>

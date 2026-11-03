@@ -1,8 +1,5 @@
 package com.github.stefvanschie.inventoryframework.util;
 
-import com.github.stefvanschie.inventoryframework.util.version.Version;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -12,12 +9,8 @@ import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -60,11 +53,7 @@ public final class SkullUtil {
      * @param id the skull id
      */
     public static void setSkull(@NotNull ItemMeta meta, @NotNull String id) {
-        if (Version.getVersion().isOlderThan(Version.V1_18_2)) {
-            setSkullReflection(meta, id);
-        } else {
-            setSkullProfile(meta, id);
-        }
+        setSkullProfile(meta, id);
     }
 
     /**
@@ -93,35 +82,4 @@ public final class SkullUtil {
         ((SkullMeta) meta).setOwnerProfile(profile);
     }
 
-    /**
-     * Sets the skull's texture via reflection.
-     *
-     * @param meta the {@link ItemMeta} of the skull to set
-     * @param id the ID of the skin URL to apply
-     * @since 0.11.6
-     */
-    private static void setSkullReflection(@NotNull ItemMeta meta, @NotNull String id) {
-        GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-        byte[] encodedData = Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}",
-                "http://textures.minecraft.net/texture/" + id).getBytes());
-        profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
-        String itemDisplayName = meta.getDisplayName();
-
-        try {
-            Field profileField = meta.getClass().getDeclaredField("profile");
-            profileField.setAccessible(true);
-            profileField.set(meta, profile);
-
-            meta.setDisplayName(itemDisplayName);
-
-            // Sets serializedProfile field on meta
-            // If it does throw NoSuchMethodException this stops, and meta is correct.
-            // Else it has profile and will set the field.
-            Method setProfile = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
-            setProfile.setAccessible(true);
-            setProfile.invoke(meta, profile);
-        } catch (NoSuchFieldException | SecurityException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException ignored) {}
-    }
 }

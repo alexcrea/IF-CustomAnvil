@@ -4,8 +4,8 @@
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>IF-parent</artifactId>
-        <groupId>com.github.stefvanschie.inventoryframework</groupId>
-        <version>0.12.2</version>
+        <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
+        <version>0.12.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     
