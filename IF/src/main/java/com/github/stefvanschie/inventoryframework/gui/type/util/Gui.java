@@ -288,7 +288,9 @@ public abstract class Gui {
      * @since 0.8.1
      */
     protected void addInventory(@NotNull Inventory inventory, @NotNull Gui gui) {
-        GUI_INVENTORIES.put(inventory, new WeakReference<>(gui));
+        synchronized(GUI_INVENTORIES) {
+            GUI_INVENTORIES.put(inventory, new WeakReference<>(gui));
+        }
     }
 
     /**
@@ -302,16 +304,19 @@ public abstract class Gui {
     @Nullable
     @Contract(pure = true)
     public static Gui getGui(@NotNull Inventory inventory) {
-        WeakReference<Gui> reference = GUI_INVENTORIES.get(inventory);
+        Gui gui;
+        synchronized(GUI_INVENTORIES) {
+            WeakReference<Gui> reference = GUI_INVENTORIES.get(inventory);
 
-        if (reference == null) {
-            return null;
-        }
+            if (reference == null) {
+                return null;
+            }
 
-        Gui gui = reference.get();
+            gui = reference.get();
 
-        if (gui == null) {
-            GUI_INVENTORIES.remove(inventory, reference);
+            if (gui == null) {
+                GUI_INVENTORIES.remove(inventory, reference);
+            }
         }
 
         return gui;
