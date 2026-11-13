@@ -1,0 +1,8 @@
+
+this is for me, I'm too lazy to look at how to properly do it
+
+deploy steps
+0: change version
+1: move settings to settings.xml in ~/.m2 & set my token & username
+2: mvn -Pdeploy clean deploy -pl '!adventure-support'
+

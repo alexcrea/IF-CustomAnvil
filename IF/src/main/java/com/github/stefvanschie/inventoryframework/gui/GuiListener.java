@@ -45,7 +45,12 @@ public class GuiListener implements Listener {
      * A collection of all {@link Gui} instances that have at least one viewer.
      */
     @NotNull
-    private final Set<Gui> activeGuiInstances = new HashSet<>();
+    private final Set<Gui> activeGuiInstances = Collections.synchronizedSet(new HashSet<>());
+
+    /**
+     * A map of {@link Gui} from inventory. only used if the inventory holder method fails
+     */
+    public final Map<Inventory, Gui> guiMap = Collections.synchronizedMap(new WeakHashMap<>());
 
     /**
      * Creates a new listener for all guis for the provided {@code plugin}.
@@ -211,7 +216,14 @@ public class GuiListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClose(@NotNull InventoryCloseEvent event) {
-        Gui gui = getGui(event.getInventory());
+        Inventory inv = event.getInventory();
+        Gui gui;
+        try {
+            gui = getGui(inv);
+        } catch(Exception e) {
+            // Most common throws are folia's when trying to access an inventory of another region
+            gui = guiMap.get(inv);
+        }
 
         if (gui == null || isNamedGuiUpdatingDirtily(gui)) {
             return;
@@ -256,10 +268,13 @@ public class GuiListener implements Listener {
 
         if (gui.getViewerCount() == 1) {
             activeGuiInstances.remove(gui);
+            guiMap.remove(inv);
         }
 
+        // For lambda
+        Gui finalGui = gui;
         //Bukkit doesn't like it if you open an inventory while the previous one is being closed
-            Bukkit.getScheduler().runTask(this.plugin, () -> gui.navigateToParent(humanEntity));}
+            Bukkit.getScheduler().runTask(this.plugin, () -> finalGui.navigateToParent(humanEntity));}
 
     /**
      * Handles removing identifiers from gui items when an item is dropped from the gui.
@@ -307,13 +322,15 @@ public class GuiListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
-        Gui gui = getGui(event.getInventory());
+        Inventory inv = event.getInventory();
+        Gui gui = getGui(inv);
 
         if (gui == null || isNamedGuiUpdatingDirtily(gui)) {
             return;
         }
 
         activeGuiInstances.add(gui);
+        guiMap.put(inv, gui);
     }
 
     /**
