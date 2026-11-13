@@ -1,6 +1,14 @@
+
+This is a fork of IF for custom anvil that do the following:
+- Remove version dependent feature (I only need the chest gui)
+- Require 1.21 or above
+- Remove inventory view abstraction
+- (Tried to) make it thread safe for folia (and other folia fix)
+
+Under is the upstream readme with modifications
 # IF <a href="https://discord.gg/RXmy4HdR4x"><img align="right" src="https://img.shields.io/discord/780514939293925407" alt="Discord guild"></a>
 
-*This framework works for Minecraft versions 1.16.5, 1.17.1, 1.18.2, 1.19.4, 1.20-1.21, and 26*
+*This framework works for Minecraft versions 1.21.0 and above
 
 An inventory framework for managing GUIs
 
@@ -12,7 +20,7 @@ Next to those panes, GUIs can also be created from XML files by simple loading t
 To add this project as a dependency to your pom.xml, add the following to your pom.xml:
 ```XML
 <dependency>
-    <groupId>com.github.stefvanschie.inventoryframework</groupId>
+    <groupId>xyz.alexcrea.cuanvil.inventoryframework</groupId>
     <artifactId>IF</artifactId>
     <version>0.12.2.4</version>
 </dependency>
@@ -29,7 +37,7 @@ Now in order to shade the project into your project, add the following to your p
         <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
         <relocations>
             <relocation>
-                <pattern>com.github.stefvanschie.inventoryframework</pattern>
+                <pattern>xyz.alexcrea.cuanvil.inventoryframework</pattern>
                 <shadedPattern>[YOUR PACKAGE].inventoryframework</shadedPattern>
             </relocation>
         </relocations>
@@ -61,7 +69,7 @@ If your plugin is a Paper plugin targeting a Minecraft version before 26.1, you 
 To add this project as a dependency for your Gradle project, make sure your `dependencies` section of your build.gradle looks like the following:
 ```Groovy
 dependencies {
-    implementation 'com.github.stefvanschie.inventoryframework:IF:0.12.2.4'
+    implementation 'xyz.alexcrea.cuanvil.inventoryframework:IF:0.12.2.4'
     // ...
 }
 ```
@@ -82,14 +90,14 @@ plugins {
 To relocate the project's classes to your own namespace, add the following, with [YOUR PACKAGE] being the top-level package of your project:
 ```Groovy
 shadowJar {
-    relocate 'com.github.stefvanschie.inventoryframework', '[YOUR PACKAGE].inventoryframework'
+    relocate 'xyz.alexcrea.cuanvil.inventoryframework', '[YOUR PACKAGE].inventoryframework'
 }
 ```
 
 If your plugin is a Paper plugin targeting a Minecraft version before 26.1, you must set the `paperweight-mappings-namespace` in `META-INF/MANIFEST.MF` to `spigot`. You can do this by changing your `shadowJar` block to look like the following:
 ```Groovy
 shadowJar {
-    relocate 'com.github.stefvanschie.inventoryframework', '[YOUR PACKAGE].inventoryframework'
+    relocate 'xyz.alexcrea.cuanvil.inventoryframework', '[YOUR PACKAGE].inventoryframework'
 
     manifest {
         attributes 'paperweight-mappings-namespace': 'spigot'
